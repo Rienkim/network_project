@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Command.h
+// Create.h
 //
 // CSED353
 // TODO: Add your names here.
@@ -8,56 +8,55 @@
 //------------------------------------------------------------------------------
 //
 
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef CREATE_H
+#define CREATE_H
 
-#include "Calendar.h"
-#include <string>
-#include <vector>
+#include "Command.h"
 
-class Command
+//------------------------------------------------------------------------------
+// Create Class inherited from Command-Class
+// Representing the "create" command called from calendar.run()
+//
+class Create : public Command
 {
   private:
-    std::string command_name_;
-
     //--------------------------------------------------------------------------
     // Copy-Constructor
     // No Copies of Object are possible.
     //
-    Command(const Command& original);
+    Create(const Create&);
 
     //--------------------------------------------------------------------------
     // = Operator-Overloading
     // No Copies of Object are possible.
     //
-    Command& operator=(const Command& original);
+    Create& operator=(const Create&);
 
   public:
     //--------------------------------------------------------------------------
-    // Constructor
+    // Constructor with Parameter for Command Constructor
     //
-    Command(std::string name);
+    Create(const std::string &name);
 
     //--------------------------------------------------------------------------
     // Destructor
     //
-    virtual ~Command() throw();
+    virtual ~Create() throw();
 
     //--------------------------------------------------------------------------
-    // Getter Methods
-    const std::string& getName();
-
-    //--------------------------------------------------------------------------
-    // Setter Methods
-    void setName(const std::string& name);
-
-    //--------------------------------------------------------------------------
-    // Executes the action.
-    // @param calendar The calendar on which the action should be performed
-    // @param params Possible parameters needed for the execution
-    // @return Integer representing the success of the action
+    // Print Usage in case of wrong parameters
     //
-    virtual int execute(Calendar& calendar, std::vector<std::string>& params) = 0;
+    void printUsage();
+
+    //--------------------------------------------------------------------------
+    // Virtual Function from Command-Class executing Command
+    // Creates a new event end pushes it back to the event list
+    //
+    // @param calendar current Calendar Object
+    // @param params string vector of parameter
+    // @return Returns ERROR or SUCCESS
+    //
+    int execute(Calendar& calendar, std::vector<std::string>& params);
 };
 
-#endif //COMMAND_H
+#endif // CREATE_H

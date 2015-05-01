@@ -11,6 +11,7 @@
 #include "Calendar.h"
 #include "Event.h"
 #include "Show.h"
+#include "Create.h"
 #include "Quit.h"
 #include <iostream>
 #include <map>
@@ -69,6 +70,7 @@ int Calendar::run()
   map<string, Command*> commands;
 
   Command* show = new Show("Show");
+  Command* create = new Create("Create");
   Command* quit = new Quit("Quit", true);
 
   stringstream divide_buffer;
@@ -80,6 +82,7 @@ int Calendar::run()
 
   //initialize map
   commands["show"] = show;
+  commands["create"] = create;
   commands["quit"] = quit;
 
   // loop stops if quit.loop_ gets 0
@@ -138,6 +141,7 @@ int Calendar::run()
 
   //free used Pointers
   delete show;
+  delete create;
   delete quit;
 
   return SUCCESS; // return 0 if success

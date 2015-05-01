@@ -45,7 +45,7 @@ void Quit::setLoop(bool new_value)
 int Quit::execute(Calendar& calendar, vector<string> &params)
 {
   if(params.size() != 0)
-    return PARAMETER_ERROR;
+    return ERROR;
 
   cout << "Good Bye!" << endl;
 

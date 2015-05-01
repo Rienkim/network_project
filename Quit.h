@@ -10,6 +10,7 @@
 
 #ifndef QUIT_H
 #define QUIT_H
+
 #include "Command.h"
 
 //------------------------------------------------------------------------------
@@ -68,4 +69,4 @@ class Quit : public Command
     int execute(Calendar& calendar, std::vector<std::string>& params);
 };
 
-#endif
+#endif // QUIT_H

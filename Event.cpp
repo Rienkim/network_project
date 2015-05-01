@@ -10,10 +10,13 @@
 
 #include "Event.h"
 #include <iostream>
+#include <iomanip>
 
 using std::string;
 using std::cout;
 using std::endl;
+using std::setfill;
+using std::setw;
 
 //--------------------------------------------------------------------------
 Event::Event()
@@ -72,9 +75,11 @@ void Event::setDuration(short duration)
 //--------------------------------------------------------------------------
 void Event::printInfo() const
 {
-  cout << "Event Name : " << name_ << endl << "Event Start: "
-      << start_time_->tm_mday << '-' << start_time_->tm_mon << '-'
-      << start_time_->tm_year << " at " << start_time_->tm_hour << ':'
-      << start_time_->tm_min << endl << "Event Dur. : " << int(duration_) << " min."
-      << endl;
+  cout << "Event Name : " << name_ << endl << "Event Start: " << setfill('0')
+      << setw(2) << start_time_->tm_mday << '-' << setfill('0') << setw(2)
+      << start_time_->tm_mon << '-' << setfill('0') << setw(2)
+      << start_time_->tm_year << " at " << setfill('0') << setw(2)
+      << start_time_->tm_hour << ':' << setfill('0') << setw(2)
+      << start_time_->tm_min << endl << "Event Dur. : " << setfill(' ')
+      << setw(4) << int(duration_) << " min." << endl;
 }

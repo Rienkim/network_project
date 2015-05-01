@@ -8,8 +8,8 @@
 //------------------------------------------------------------------------------
 //
 
-#ifndef CALENDAR_H_
-#define CALENDAR_H_
+#ifndef CALENDAR_H
+#define CALENDAR_H
 
 #include <list>
 
@@ -82,4 +82,4 @@ class Calendar
     void printEvents() const;
 };
 
-#endif /* CALENDAR_H_ */
+#endif // CALENDAR_H

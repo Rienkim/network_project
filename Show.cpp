@@ -35,10 +35,10 @@ int Show::execute(Calendar& calendar, vector<string>& params)
 {
 
   if(params.size() != 0)
-    return PARAMETER_ERROR;
+    return ERROR;
 
   if(&calendar == NULL || calendar.getEvents().size() == 0)
-    return PARAMETER_ERROR;
+    return ERROR;
 
   calendar.printEvents();
 

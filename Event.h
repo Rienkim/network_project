@@ -14,7 +14,7 @@
 #include <string>
 #include <ctime>
 
-static const int NOT_INIT = -1;
+const int NOT_INIT = -1;
 
 //------------------------------------------------------------------------------
 // Event
