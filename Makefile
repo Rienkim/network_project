@@ -1,4 +1,4 @@
-SUBMISSION = cnw
+SUBMISSION = ass3
 EXECUTABLE = $(SUBMISSION)
 SOURCES    = $(wildcard *.cpp)
 OBJECTS    = $(patsubst %,%,${SOURCES:.cpp=.o})
@@ -32,7 +32,7 @@ cleanw :
 
 #make valgrind
 valgrind:
-	valgrind --tool=memcheck --leak-check=full ./$(EXECUTABLE)
+	valgrind --tool=memcheck --leak-check=full ./$(EXECUTABLE) -d=sample.rsk
 
 #make submission zip archive for PALME
 submission:
