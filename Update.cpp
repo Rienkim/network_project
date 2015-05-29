@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Show.cpp
+// Update.cpp
 //
 // CSED353
 // TODO: Add your names here.
@@ -8,41 +8,31 @@
 //------------------------------------------------------------------------------
 //
 
-#include "Show.h"
+#include "Update.h"
 #include "Calendar.h"
 #include <string>
-#include <iostream>
-#include <vector>
 
 using std::string;
-using std::cout;
-using std::endl;
 using std::vector;
 
 //------------------------------------------------------------------------------
-Show::Show(const string& name)
+Update::Update(const string& name)
     : Command(name)
 {
 }
 
 //------------------------------------------------------------------------------
-Show::~Show() throw()
+Update::~Update() throw()
 {
 }
 
 //------------------------------------------------------------------------------
-int Show::execute(Calendar& calendar, vector<string>& params)
+int Update::execute(Calendar& calendar, vector<string> &params)
 {
   if(params.size() != 0)
     return ERROR;
 
-  if(&calendar == NULL || calendar.getNextEvent() == NULL)
-  {
-    cout << "No Calendar entries yet!" << endl;
-    return SUCCESS;
-  }
-
-  calendar.printEvents();
+  calendar.updateCalendar();
 
   return SUCCESS;
 }

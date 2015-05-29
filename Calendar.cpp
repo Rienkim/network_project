@@ -13,10 +13,10 @@
 #include "Show.h"
 #include "Create.h"
 #include "Quit.h"
+#include "Update.h"
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <vector>
 
 using std::list;
 using std::string;
@@ -33,34 +33,84 @@ Calendar::Calendar()
 }
 
 //--------------------------------------------------------------------------
-Calendar::Calendar(std::list<Event*> events)
-    : events_(events)
+Calendar::Calendar(vector<list<Event*>*> calendar_queue)
+    : calendar_queue_(calendar_queue), next_event_(NULL)
 {
 }
 
 //--------------------------------------------------------------------------
 Calendar::~Calendar() throw()
 {
-  for(list<Event*>::const_iterator it = events_.begin(); it != events_.end();
-        ++it)
-      delete (*it);
+  for(int i = 0; i < 4; i++)
+  {
+    for(list<Event*>::const_iterator it = calendar_queue_[i]->begin();
+        it != calendar_queue_[i]->end(); ++it)
+      delete ( *it);
+    delete calendar_queue_[i];
+  }
 }
 
 //--------------------------------------------------------------------------
-list<Event*> Calendar::getEvents() const
+vector<list<Event*>*> Calendar::getQueue() const
 {
-  return events_;
+  return calendar_queue_;
 }
 
 //--------------------------------------------------------------------------
-void Calendar::setEvents(const std::list<Event*> events)
+const Event* Calendar::getNextEvent() const
 {
-  events_ = events;
+  return next_event_;
 }
 
+//--------------------------------------------------------------------------
+void Calendar::setQueue(const vector<list<Event*>*> calendar_queue)
+{
+  calendar_queue_ = calendar_queue;
+}
+
+//--------------------------------------------------------------------------
+void Calendar::setNextEvent(Event* next_event)
+{
+  next_event_ = next_event;
+}
+
+//--------------------------------------------------------------------------
 void Calendar::addEvent(Event* event)
 {
-  events_.push_back(event);
+  // Get event quarter number.
+  int quarter = event->calcQuarter();
+  bool inserted = false;
+
+  for(list<Event*>::iterator it = calendar_queue_[quarter]->begin();
+      it != calendar_queue_[quarter]->end(); ++it)
+  {
+    int ret = ( *it)->compareEvent(event);
+
+    if(ret == OVERLAP)
+    {
+      cout << "Event could not be added to calendar due to overlapping with: "
+          << endl;
+      ( *it)->printInfo();
+      delete event;
+      return;
+    }
+
+    if(ret == LATER)
+      continue;
+
+    // Else insert event here.
+    calendar_queue_[quarter]->insert(it, event);
+    inserted = true;
+    break;
+  }
+
+  if( !inserted)
+  {
+    calendar_queue_[quarter]->push_back(event);
+  }
+
+  if(next_event_ == NULL || next_event_->compareEvent(event) == EARLIER)
+    next_event_ = event;
 }
 
 //-----------------------------------------------------------------------------
@@ -72,6 +122,7 @@ int Calendar::run()
   Command* show = new Show("Show");
   Command* create = new Create("Create");
   Command* quit = new Quit("Quit", true);
+  Command* update = new Update("Update");
 
   stringstream divide_buffer;
   int error = 0;
@@ -80,12 +131,13 @@ int Calendar::run()
   string token;
   vector<string> parameter;
 
-  //initialize map
+//initialize map
   commands["show"] = show;
   commands["create"] = create;
   commands["quit"] = quit;
+  commands["update"] = update;
 
-  // loop stops if quit.loop_ gets 0
+// loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
   {
     cout << "cnw> ";
@@ -120,7 +172,7 @@ int Calendar::run()
     if(commands.find(current_command) != commands.end())
     {
       actual = commands.find(current_command)->second;
-      error = actual->execute(*this, parameter);
+      error = actual->execute( *this, parameter);
     }
     else
     {
@@ -139,18 +191,50 @@ int Calendar::run()
     error = SUCCESS;
   }
 
-  //free used Pointers
+//free used Pointers
   delete show;
   delete create;
   delete quit;
+  delete update;
 
   return SUCCESS; // return 0 if success
 }
 
 //--------------------------------------------------------------------------
+void Calendar::updateCalendar()
+{
+  time_t t_now = std::time(NULL);
+  tm* now = localtime( &t_now);
+  Event* event_now = new Event("now", now, 0);
+  double diff = event_now->compareEvent(next_event_);
+
+  // Next Event in list occurs in future or is scheduled at the moment.
+  if(diff == LATER || diff == OVERLAP)
+    return;
+
+  // Else delete old events.
+  for(int i = next_event_->calcQuarter(); i <= event_now->calcQuarter(); i++)
+  {
+    for(list<Event*>::iterator it = calendar_queue_[i]->begin();
+        it != calendar_queue_[i]->end(); ++it)
+    {
+      if( *it != next_event_)
+        continue;
+      // TODO: Implement here!!!
+    }
+  }
+}
+
+//--------------------------------------------------------------------------
 void Calendar::printEvents() const
 {
-  for(list<Event*>::const_iterator it = events_.begin(); it != events_.end();
-      ++it)
-    (*it)->printInfo();
+  cout << "----- Next Event: " << endl;
+  next_event_->printInfo();
+  cout << "-----" << endl;
+  for(int i = 0; i < 4; i++)
+  {
+    for(list<Event*>::const_iterator it = calendar_queue_[i]->begin();
+        it != calendar_queue_[i]->end(); ++it)
+      ( *it)->printInfo();
+  }
 }

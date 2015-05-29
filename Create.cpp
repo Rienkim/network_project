@@ -75,7 +75,7 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
   string token = time.substr(pos, time.find(delim));
   pos = token.length() + delim.length();
   hour = atoi(token.c_str());
-  if(hour < 0 || hour > 24)
+  if(hour < 0 || hour >= 24)
   {
     cout << "Wrong Hour: " << hour << endl;
     printUsage();
@@ -103,10 +103,6 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
   token = date.substr(pos);
   year = atoi(token.c_str());
 
-  // get local time now
-  /*time_t t = time(NULL);
-   tm* now = localtime( &t);*/
-
   time_t t_now = std::time(NULL);
   tm* now = localtime( &t_now);
 
@@ -116,7 +112,7 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
       || month > 12)
   {
     cout << "Wrong Year/Month: " << year << '/' << month << endl;
-    cout << "Now:              " << now->tm_year << endl;
+    cout << "Now:              " << now->tm_year + YEAR_BEGIN_CNT << endl;
     printUsage();
     return ERROR;
   }
@@ -143,8 +139,9 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
   start_time->tm_hour = hour;
   start_time->tm_min = min;
   start_time->tm_mday = day;
-  start_time->tm_mon = month;
-  start_time->tm_year = year;
+  start_time->tm_mon = month - 1;
+  start_time->tm_year = year - YEAR_BEGIN_CNT;
+  start_time->tm_sec = 0;
 
   Event* event = new Event(name, start_time, atoi(duration.c_str()));
 

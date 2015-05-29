@@ -15,6 +15,9 @@
 #include <ctime>
 
 const int NOT_INIT = -1;
+const int LATER = 0;
+const int EARLIER = 1;
+const int OVERLAP = 2;
 
 //------------------------------------------------------------------------------
 // Event
@@ -73,6 +76,18 @@ class Event
     void setName(const std::string& name);
     void setStartTime(tm* time);
     void setDuration(short duration);
+
+    //--------------------------------------------------------------------------
+    // Compare Events
+    // Returns LATER if param other occurs later, EARLIER if other event is
+    // earlier than calling event and OVERLAP in case of overlaping events.
+    //
+    int compareEvent(const Event* other) const;
+
+    //--------------------------------------------------------------------------
+    // Calculate Quarter of Event.
+    //
+    int calcQuarter();
 
     //--------------------------------------------------------------------------
     // Print Event Info
