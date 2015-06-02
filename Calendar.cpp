@@ -14,6 +14,7 @@
 #include "Create.h"
 #include "Quit.h"
 #include "Update.h"
+#include "Save.h"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -102,6 +103,7 @@ int Calendar::run()
   Command* create = new Create("Create");
   Command* quit = new Quit("Quit", true);
   Command* update = new Update("Update");
+  Command* save = new Save("Save");
 
   stringstream divide_buffer;
   int error = 0;
@@ -115,6 +117,7 @@ int Calendar::run()
   commands["create"] = create;
   commands["quit"] = quit;
   commands["update"] = update;
+  commands["save"] = save;
 
 // loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
@@ -172,6 +175,7 @@ int Calendar::run()
   delete create;
   delete quit;
   delete update;
+  delete save;
 
   return SUCCESS; // return 0 if success
 }
