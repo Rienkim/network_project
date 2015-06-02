@@ -15,7 +15,6 @@
 
 using std::cout;
 using std::endl;
-using std::vector;
 using std::list;
 
 //--------------------------------------------------------------------------
@@ -27,26 +26,17 @@ int main(int argc, char *argv[])
   begin1->tm_hour = 21;
   begin1->tm_min = 00;
   begin1->tm_mday = 30;
-  begin1->tm_mon = 4;
+  begin1->tm_mon = 5 - 1;
   begin1->tm_year = 2015 - 1900;
 
   tm* begin2 = new tm;
   memcpy(begin2, begin1, sizeof(tm));
   begin2->tm_mday = 18;
 
-  Event* event1 = new Event("Event 1", begin1, 5*60);
+  Event* event1 = new Event("Event 1", begin1, 5 * 60);
   Event* event2 = new Event("Event 2", begin2, 3 * 60);
 
-  vector<list<Event*>*> calendar_queue;
-  list<Event*>* quarter_1 = new list<Event*>;
-  list<Event*>* quarter_2 = new list<Event*>;
-  list<Event*>* quarter_3 = new list<Event*>;
-  list<Event*>* quarter_4 = new list<Event*>;
-
-  calendar_queue.push_back(quarter_1);
-  calendar_queue.push_back(quarter_2);
-  calendar_queue.push_back(quarter_3);
-  calendar_queue.push_back(quarter_4);
+  list<Event*> calendar_queue;
 
   Calendar calendar(calendar_queue);
 

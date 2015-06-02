@@ -36,7 +36,7 @@ int Show::execute(Calendar& calendar, vector<string>& params)
   if(params.size() != 0)
     return ERROR;
 
-  if(&calendar == NULL || calendar.getNextEvent() == NULL)
+  if(&calendar == NULL || calendar.getQueue().size() == 0)
   {
     cout << "No Calendar entries yet!" << endl;
     return SUCCESS;

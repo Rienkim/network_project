@@ -9,6 +9,7 @@
 //
 
 #include "Event.h"
+#include "Create.h"
 #include <iostream>
 #include <iomanip>
 
@@ -120,28 +121,13 @@ int Event::compareEvent(const Event* other) const
 }
 
 //--------------------------------------------------------------------------
-int Event::calcQuarter()
-{
-  if(start_time_->tm_mon <= 2)
-    return 0;
-  else
-    if(start_time_->tm_mon <= 5)
-      return 1;
-    else
-      if(start_time_->tm_mon <= 8)
-        return 2;
-      else
-        return 3;
-}
-
-//--------------------------------------------------------------------------
 void Event::printInfo() const
 {
   cout << "Event Name : " << name_ << endl << "Event Start: " << setfill('0')
       << setw(2) << start_time_->tm_mday << '-' << setfill('0') << setw(2)
-      << start_time_->tm_mon + 1 << '-' << setfill('0') << setw(2)
-      << start_time_->tm_year + 1900 << " at " << setfill('0') << setw(2)
-      << start_time_->tm_hour << ':' << setfill('0') << setw(2)
+      << start_time_->tm_mon + MONTH_OFS << '-' << setfill('0') << setw(2)
+      << start_time_->tm_year + YEAR_BEGIN_CNT << " at " << setfill('0')
+      << setw(2) << start_time_->tm_hour << ':' << setfill('0') << setw(2)
       << start_time_->tm_min << endl << "Event Dur. : " << setfill(' ')
       << setw(4) << int(duration_) << " min." << endl;
 }

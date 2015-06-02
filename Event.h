@@ -85,11 +85,6 @@ class Event
     int compareEvent(const Event* other) const;
 
     //--------------------------------------------------------------------------
-    // Calculate Quarter of Event.
-    //
-    int calcQuarter();
-
-    //--------------------------------------------------------------------------
     // Print Event Info
     //
     void printInfo() const;

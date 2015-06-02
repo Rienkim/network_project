@@ -13,6 +13,15 @@
 
 #include "Command.h"
 
+// Event can be MAX_FUTUR_YEAR years in future from current time.
+const int MAX_FUTURE_YEAR = 5;
+// Duration of event can be MAX_DURATION.
+const int MAX_DURATION = 24 * 60;
+// Beginning of year count in tm struct.
+const int YEAR_BEGIN_CNT = 1900;
+// Month offset.
+const int MONTH_OFS = 1;
+
 //------------------------------------------------------------------------------
 // Create Class inherited from Command-Class
 // Representing the "create" command called from calendar.run()

@@ -19,10 +19,6 @@ using std::endl;
 using std::stringstream;
 using std::string;
 
-const int MAX_FUTURE_YEAR = 15;
-const int MAX_DURATION = 24 * 60;
-const int YEAR_BEGIN_CNT = 1900;
-
 //------------------------------------------------------------------------------
 Create::Create(const std::string &name)
     : Command(name)
@@ -75,7 +71,7 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
   string token = time.substr(pos, time.find(delim));
   pos = token.length() + delim.length();
   hour = atoi(token.c_str());
-  if(hour < 0 || hour >= 24)
+  if(hour < 0 || hour > 23)
   {
     cout << "Wrong Hour: " << hour << endl;
     printUsage();
@@ -139,13 +135,25 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
   start_time->tm_hour = hour;
   start_time->tm_min = min;
   start_time->tm_mday = day;
-  start_time->tm_mon = month - 1;
-  start_time->tm_year = year - YEAR_BEGIN_CNT;
+  start_time->tm_mon = month - MONTH_OFS;      // Month in range 0 - 11
+  start_time->tm_year = year - YEAR_BEGIN_CNT; // Years since 1900
   start_time->tm_sec = 0;
 
   Event* event = new Event(name, start_time, atoi(duration.c_str()));
+  Event* event_now = new Event("now", now, 0);
 
-  calendar.addEvent(event);
+  // Event is in future.
+  if(event_now->compareEvent(event) != EARLIER)
+    calendar.addEvent(event);
+
+  else
+  {
+    cout << "Event was in past and thus not created." << endl;
+    delete event;
+  }
+
+  event_now->setStartTime(NULL);
+  delete event_now;
 
   return SUCCESS;
 }

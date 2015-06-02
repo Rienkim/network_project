@@ -11,7 +11,6 @@
 #ifndef CALENDAR_H
 #define CALENDAR_H
 
-#include <vector>
 #include <list>
 
 const int SUCCESS = 0;
@@ -27,8 +26,7 @@ class Event;
 class Calendar
 {
   private:
-    std::vector<std::list<Event*>*> calendar_queue_;
-    Event* next_event_;
+    std::list<Event*> calendar_queue_;
 
     //--------------------------------------------------------------------------
     // Copy-Constructor
@@ -51,7 +49,7 @@ class Calendar
     //--------------------------------------------------------------------------
     // Constructor
     //
-    Calendar(std::vector<std::list<Event*>*> calendar_queue_);
+    Calendar(std::list<Event*> calendar_queue);
 
     //--------------------------------------------------------------------------
     // Destructor
@@ -61,14 +59,12 @@ class Calendar
     //--------------------------------------------------------------------------
     // Getter Methods
     //
-    std::vector<std::list<Event*>*> getQueue() const;
-    const Event* getNextEvent() const;
+    std::list<Event*> getQueue() const;
 
     //--------------------------------------------------------------------------
     // Setter Methods
     //
-    void setQueue(const std::vector<std::list<Event*>*> calendar_queue);
-    void setNextEvent(Event* next_event);
+    void setQueue(const std::list<Event*> calendar_queue);
 
     //--------------------------------------------------------------------------
     // Add new event
