@@ -16,8 +16,8 @@ using std::cout;
 using std::endl;
 
 //------------------------------------------------------------------------------
-Whois::Whois(const string& name, bool init)
-    : Command(name), loop_(init)
+Whois::Whois(const string& name)
+    : Command(name)
 {
 }
 
@@ -26,17 +26,6 @@ Whois::~Whois() throw()
 {
 }
 
-//------------------------------------------------------------------------------
-bool Whois::getLoop() const
-{
-  return loop_;
-}
-
-//------------------------------------------------------------------------------
-void Whois::setLoop(bool new_value)
-{
-  loop_ = new_value;
-}
 
 //------------------------------------------------------------------------------
 int Whois::execute(Calendar& calendar, vector<string> &params)
@@ -46,7 +35,6 @@ int Whois::execute(Calendar& calendar, vector<string> &params)
 
   cout << "Good Bye!" << endl;
 
-  loop_ = false;
 
   return SUCCESS;
 }

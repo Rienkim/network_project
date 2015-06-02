@@ -13,6 +13,7 @@
 #include "Show.h"
 #include "Create.h"
 #include "Quit.h"
+#include "Whois.h"
 #include "Update.h"
 #include <iostream>
 #include <map>
@@ -137,7 +138,7 @@ int Calendar::run()
   commands["create"] = create;
   commands["quit"] = quit;
   commands["update"] = update;
-  commands["whois"] = whois
+  commands["whois"] = whois;
 
 // loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
