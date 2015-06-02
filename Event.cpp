@@ -11,6 +11,9 @@
 #include "Event.h"
 #include <iostream>
 #include <iomanip>
+#include <time.h>
+
+#define timegm _mkgmtime
 
 using std::string;
 using std::cout;
@@ -91,7 +94,8 @@ int Event::compareEvent(const Event* other) const
     return EARLIER;
 
   // In same month.
-  double diff = difftime(timegm(this->start_time_), timegm(other->start_time_));
+  //double diff = difftime(timegm(this->start_time_), timegm(other->start_time_));
+  double diff = 0;//difftime(timegm(this->start_time_), timegm(other->start_time_));
 
   // One day difference overlapping (other event one day later)
   if(this->start_time_->tm_mday - other->start_time_->tm_mday == -1)

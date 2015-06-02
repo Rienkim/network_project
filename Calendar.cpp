@@ -123,6 +123,7 @@ int Calendar::run()
   Command* create = new Create("Create");
   Command* quit = new Quit("Quit", true);
   Command* update = new Update("Update");
+  Command* whois = new Whois("Whois");
 
   stringstream divide_buffer;
   int error = 0;
@@ -136,6 +137,7 @@ int Calendar::run()
   commands["create"] = create;
   commands["quit"] = quit;
   commands["update"] = update;
+  commands["whois"] = whois
 
 // loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
@@ -196,6 +198,7 @@ int Calendar::run()
   delete create;
   delete quit;
   delete update;
+  delete whois;
 
   return SUCCESS; // return 0 if success
 }
