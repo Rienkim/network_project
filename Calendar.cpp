@@ -15,6 +15,7 @@
 #include "Quit.h"
 #include "Whois.h"
 #include "Update.h"
+#include "Signin.h"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -35,7 +36,7 @@ Calendar::Calendar()
 
 //--------------------------------------------------------------------------
 Calendar::Calendar(vector<list<Event*>*> calendar_queue)
-    : calendar_queue_(calendar_queue), next_event_(NULL)
+    : calendar_queue_(calendar_queue), next_event_(NULL), isConnected(false)
 {
 }
 
@@ -64,6 +65,12 @@ const Event* Calendar::getNextEvent() const
 }
 
 //--------------------------------------------------------------------------
+const bool Calendar::getConnectionState()
+{
+	return isConnected;
+}
+
+//--------------------------------------------------------------------------
 void Calendar::setQueue(const vector<list<Event*>*> calendar_queue)
 {
   calendar_queue_ = calendar_queue;
@@ -73,6 +80,12 @@ void Calendar::setQueue(const vector<list<Event*>*> calendar_queue)
 void Calendar::setNextEvent(Event* next_event)
 {
   next_event_ = next_event;
+}
+
+//--------------------------------------------------------------------------
+void Calendar::setConnectionState(bool state)
+{
+	isConnected = state;
 }
 
 //--------------------------------------------------------------------------
@@ -125,6 +138,7 @@ int Calendar::run()
   Command* quit = new Quit("Quit", true);
   Command* update = new Update("Update");
   Command* whois = new Whois("Whois");
+  Command* signin = new Signin("Signin");
 
   stringstream divide_buffer;
   int error = 0;
@@ -139,6 +153,7 @@ int Calendar::run()
   commands["quit"] = quit;
   commands["update"] = update;
   commands["whois"] = whois;
+  commands["signin"] = signin;
 
 // loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
@@ -200,6 +215,7 @@ int Calendar::run()
   delete quit;
   delete update;
   delete whois;
+  delete signin;
 
   return SUCCESS; // return 0 if success
 }

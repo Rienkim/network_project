@@ -13,16 +13,26 @@
 #include <iostream>
 #include <string.h>
 
+//Headers for socket comm
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <pthread.h>
+
 using std::cout;
 using std::endl;
 using std::vector;
 using std::list;
+
+#define BUFSIZE 100
 
 //--------------------------------------------------------------------------
 // Main Function
 //
 int main(int argc, char *argv[])
 {
+
   tm* begin1 = new tm;
   begin1->tm_hour = 21;
   begin1->tm_min = 00;
