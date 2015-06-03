@@ -80,34 +80,24 @@ void Event::setDuration(short duration)
 //--------------------------------------------------------------------------
 int Event::compareEvent(const Event* other) const
 {
-  if(this->start_time_->tm_year < other->start_time_->tm_year)
-    return LATER;
-  if(this->start_time_->tm_year > other->start_time_->tm_year)
-    return EARLIER;
-
-  // In same year.
-  if(this->start_time_->tm_mon < other->start_time_->tm_mon)
-    return LATER;
-  if(this->start_time_->tm_mon > other->start_time_->tm_mon)
-    return EARLIER;
-
-  // In same month.
   double diff = difftime(timegm(this->start_time_), timegm(other->start_time_));
 
-  // One day difference overlapping (other event one day later)
-  if(this->start_time_->tm_mday - other->start_time_->tm_mday == -1)
+  // Time Diff bigger than duration of calling event, no overlap possible.
+  if(diff <= -(MAX_DURATION * 60))
+    return LATER;
+  if(diff >= MAX_DURATION * 60)
+    return EARLIER;
+
+  if(diff < 0)
+  {
     if((diff * -1) / 60 < this->duration_)
       return OVERLAP;
-
-  // One day difference overlapping (other event one day earlier)
-  if(this->start_time_->tm_mday - other->start_time_->tm_mday == 1)
+  }
+  else
+  {
     if(diff / 60 < other->duration_)
       return OVERLAP;
-
-  if(this->start_time_->tm_mday < other->start_time_->tm_mday)
-    return LATER;
-  if(this->start_time_->tm_mday > other->start_time_->tm_mday)
-    return EARLIER;
+  }
 
   // On same day.
   // Other event occurs diff seconds later than current event.
@@ -115,6 +105,11 @@ int Event::compareEvent(const Event* other) const
     return LATER;
 
   if(diff > 0 && other->duration_ < (diff / 60))
+    return EARLIER;
+
+  if(diff < 0)
+    return LATER;
+  else
     return EARLIER;
 
   return OVERLAP;
