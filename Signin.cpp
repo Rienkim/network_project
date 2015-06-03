@@ -40,15 +40,18 @@ void Signin::printUsage()
 	cout<<"Usage : signin <IP> <Port>"<<endl;
 }
 
-void * Signin::send_message(void * arg)
+void * Signin::tx_message(void * arg)
 {
 	thread_in thread_input = *((thread_in *)arg);
 	thread_input.calendar->getConnectionState();
 	cout<<"Hello world";
 }
 
-void * Signin::recv_message(void * arg)
+void * Signin::rx_message(void * arg)
 {
+	thread_in thread_input = *((thread_in *)arg);
+
+	if()
 	cout<<"Hello world";
 }
 
@@ -62,14 +65,15 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
 	  return ERROR;
   }
 
-  int sock;
+  int sock_tx, sock_rx;
   struct sockaddr_in serv_addr;
-  pthread_t snd_thread, rcv_thread;
+  pthread_t tx_thread, rx_thread;
   void * thread_result;
-  thread_in thread_input;
+  thread_in tx_thread_input,rx_thread_input;
 
-  sock = socket(PF_INET, SOCK_STREAM, 0);
-  if(sock == -1)
+  sock_tx = socket(PF_INET, SOCK_STREAM, 0);
+  sock_rx = socket(PF_INET, SOCK_STREAM, 0);
+  if(sock_tx == -1 || sock_rx == -1)
   {
 	  cout<<"Socket() Error"<<endl;
 	  return ERROR;
@@ -80,17 +84,20 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
   serv_addr.sin_port = htons(atoi(params[1].c_str()));
   serv_addr.sin_addr.s_addr = inet_addr(params[0].c_str());
 
-  if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1)
+  if(connect(sock_tx, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1
+		  || connect(sock_rx, (struct sockaddr*)&serv_addr, sizeof(serv_addr)))
   {
 	  cout<<"connect() error"<<endl;
 	  return ERROR;
   }
 
-  thread_input.calendar = &(calendar);
-  thread_input.sock = sock;
+  tx_thread_input.calendar = &(calendar);
+  tx_thread_input.sock = sock_tx;
+  rx_thread_input.calendar = &(calendar);
+  rx_thread_input.sock = sock_rx;
 
-  pthread_create(&snd_thread, NULL, Signin::send_message, (void *)&thread_input);
-  pthread_create(&rcv_thread, NULL, Signin::recv_message, (void *)&thread_input);
+  pthread_create(&tx_thread, NULL, Signin::tx_message, (void *)&tx_thread_input);
+  pthread_create(&rx_thread, NULL, Signin::rx_message, (void *)&rx_thread_input);
 
   calendar.setConnectionState(true);
   return SUCCESS;

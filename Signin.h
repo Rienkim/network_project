@@ -53,8 +53,8 @@ class Signin : public Command
 
     //--------------------------------------------------------------------------
     // Send, Receive Thread Function
-    static void *send_message(void* arg);
-    static void *recv_message(void *arg);
+    static void *tx_message(void* arg);
+    static void *rx_message(void *arg);
 
     //--------------------------------------------------------------------------
     // Virtual Function from Command-Class executing Command
