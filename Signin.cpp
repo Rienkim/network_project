@@ -55,7 +55,7 @@ void * Signin::recv_message(void * arg)
 //------------------------------------------------------------------------------
 int Signin::execute(Calendar& calendar, vector<string> &params)
 {
-  if(params.size() != 3)
+  if(params.size() != 2)
   {
 	  cout<<params.size()<<endl;
 	  printUsage();
@@ -78,7 +78,7 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
   memset(&serv_addr, 0, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(atoi(params[1].c_str()));
-  serv_addr.sin_addr.s_addr = inet_addr(params[2].c_str());
+  serv_addr.sin_addr.s_addr = inet_addr(params[0].c_str());
 
   if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1)
   {
