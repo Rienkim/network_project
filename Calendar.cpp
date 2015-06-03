@@ -13,8 +13,10 @@
 #include "Show.h"
 #include "Create.h"
 #include "Quit.h"
+#include "Whois.h"
 #include "Update.h"
 #include "Save.h"
+#include "Signin.h"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -54,12 +56,25 @@ list<Event*> Calendar::getQueue() const
 }
 
 //--------------------------------------------------------------------------
+const bool Calendar::getConnectionState()
+{
+	return isConnected;
+}
+
+//--------------------------------------------------------------------------
 void Calendar::setQueue(const list<Event*> calendar_queue)
 {
   calendar_queue_ = calendar_queue;
 }
 
 //--------------------------------------------------------------------------
+void Calendar::setConnectionState(bool state)
+{
+	isConnected = state;
+}
+
+//--------------------------------------------------------------------------
+
 void Calendar::addEvent(Event* event)
 {
   bool inserted = false;
@@ -104,6 +119,8 @@ int Calendar::run()
   Command* quit = new Quit("Quit", true);
   Command* update = new Update("Update");
   Command* save = new Save("Save");
+  Command* whois = new Whois("Whois");
+  Command* signin = new Signin("Signin");
 
   stringstream divide_buffer;
   int error = 0;
@@ -118,6 +135,8 @@ int Calendar::run()
   commands["quit"] = quit;
   commands["update"] = update;
   commands["save"] = save;
+  commands["whois"] = whois;
+  commands["signin"] = signin;
 
 // loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
@@ -176,6 +195,8 @@ int Calendar::run()
   delete quit;
   delete update;
   delete save;
+  delete whois;
+  delete signin;
 
   return SUCCESS; // return 0 if success
 }

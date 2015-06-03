@@ -12,6 +12,9 @@
 #include "Create.h"
 #include <iostream>
 #include <iomanip>
+#include <time.h>
+
+#define timegm _mkgmtime
 
 using std::string;
 using std::cout;

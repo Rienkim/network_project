@@ -16,7 +16,7 @@ all: $(EXECUTABLE)
 
 #link Objects
 $(EXECUTABLE) : $(OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+	$(CXX) -pthread -o $@ $^ $(LDFLAGS)
 
 #make clean
 clean:

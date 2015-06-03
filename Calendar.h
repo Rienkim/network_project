@@ -27,6 +27,7 @@ class Calendar
 {
   private:
     std::list<Event*> calendar_queue_;
+    bool isConnected;
 
     //--------------------------------------------------------------------------
     // Copy-Constructor
@@ -60,11 +61,13 @@ class Calendar
     // Getter Methods
     //
     std::list<Event*> getQueue() const;
+    const bool getConnectionState();
 
     //--------------------------------------------------------------------------
     // Setter Methods
     //
     void setQueue(const std::list<Event*> calendar_queue);
+    void setConnectionState(bool);
 
     //--------------------------------------------------------------------------
     // Add new event
