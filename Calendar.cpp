@@ -58,7 +58,7 @@ list<Event*> Calendar::getQueue() const
 //--------------------------------------------------------------------------
 const bool Calendar::getConnectionState()
 {
-	return isConnected;
+  return isConnected;
 }
 
 //--------------------------------------------------------------------------
@@ -70,12 +70,12 @@ void Calendar::setQueue(const list<Event*> calendar_queue)
 //--------------------------------------------------------------------------
 void Calendar::setConnectionState(bool state)
 {
-	isConnected = state;
+  isConnected = state;
 }
 
 //--------------------------------------------------------------------------
 
-void Calendar::addEvent(Event* event)
+void Calendar::addEvent(Event* event, bool wait_server)
 {
   bool inserted = false;
 
@@ -90,6 +90,9 @@ void Calendar::addEvent(Event* event)
           << endl;
       ( *it)->printInfo();
       delete event;
+
+      // TODO: TELL SERVER THAT EVENT CANNOT BE SCHEDULED!
+
       return;
     }
 
@@ -97,6 +100,10 @@ void Calendar::addEvent(Event* event)
       continue;
 
     // Else insert event here.
+    // TODO: TELL SEVER THAT INSERT IS POSSIBLE.
+    while(wait_server);
+
+    // TODO: WAIT FOR REPLY OF SERVER. IF YES INSERT, IF NO DELETE EVENT.
     calendar_queue_.insert(it, event);
     inserted = true;
     break;
@@ -104,6 +111,10 @@ void Calendar::addEvent(Event* event)
 
   if( !inserted)
   {
+    // TODO: TELL SEVER THAT INSERT IS POSSIBLE.
+    while(wait_server);
+
+    // TODO: WAIT FOR REPLY OF SERVER. IF YES INSERT, IF NO DELETE.
     calendar_queue_.push_back(event);
   }
 }

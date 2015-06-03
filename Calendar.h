@@ -72,7 +72,7 @@ class Calendar
     //--------------------------------------------------------------------------
     // Add new event
     //
-    void addEvent(Event* event);
+    void addEvent(Event* event, bool wait_server);
 
     //--------------------------------------------------------------------------
     // Function to start the calendar.

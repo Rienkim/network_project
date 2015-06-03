@@ -14,6 +14,7 @@
 #include <string.h>
 #include <fstream>
 #include <unistd.h>
+#include <cstdlib>
 
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -26,6 +27,16 @@ using std::endl;
 using std::list;
 using std::string;
 using std::ifstream;
+
+static const int BUFSIZE = 100;
+
+void* clnt_connection(void* arg);
+void send_message(char* message, int len);
+void error_handling(const char* message);
+
+int clnt_number = 0;
+int clnt_socks[10];
+pthread_mutex_t mutx;
 
 //--------------------------------------------------------------------------
 // Main Function
@@ -59,8 +70,8 @@ int main(int argc, char *argv[])
 
     Calendar calendar(calendar_queue);
 
-    calendar.addEvent(event1);
-    calendar.addEvent(event2);
+    calendar.addEvent(event1, false);
+    calendar.addEvent(event2, false);
 
     calendar.run();
     return SUCCESS;
@@ -104,7 +115,7 @@ int main(int argc, char *argv[])
         pthread_create(&thread, NULL, clnt_connection,(void *)clnt_sock);
         cout<<"New Connection : IP: "<<inet_ntoa(clnt_addr.sin_addr)<<endl;
     }
-    return SUCCESS
+    return SUCCESS;
   }
 
 
@@ -174,7 +185,7 @@ int main(int argc, char *argv[])
 
 void * clnt_connection(void * arg)
 {
-    int clnt_sock = (int)arg;
+    int clnt_sock = *((int*)arg);
     int str_len = 0;
     char message[BUFSIZE];
     int i;
