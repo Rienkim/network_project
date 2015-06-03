@@ -12,12 +12,14 @@
 #define EVENT_H
 
 #include <string>
+#include <vector>
 #include <ctime>
 
 const int NOT_INIT = -1;
 const int LATER = 0;
 const int EARLIER = 1;
 const int OVERLAP = 2;
+const int USAGE_ERROR = 3;
 
 //------------------------------------------------------------------------------
 // Event
@@ -83,6 +85,16 @@ class Event
     // earlier than calling event and OVERLAP in case of overlaping events.
     //
     int compareEvent(const Event* other) const;
+
+    //--------------------------------------------------------------------------
+    // Makes strings out of the members of event and returns them in a vector.
+    //
+    std::vector<std::string> eventToString() const;
+
+    //--------------------------------------------------------------------------
+    // Sets up the event with the data of strings in the vector.
+    //
+    int stringToEvent(std::vector<std::string>& event_data);
 
     //--------------------------------------------------------------------------
     // Print Event Info
