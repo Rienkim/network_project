@@ -51,7 +51,7 @@ void * Signin::rx_message(void * arg)
 {
 	thread_in thread_input = *((thread_in *)arg);
 
-	if()
+	//if()
 	cout<<"Hello world";
 }
 
