@@ -24,10 +24,11 @@ class Event;
 //
 //
 class Calendar
-{
+{//suck joon ba bo
   private:
     std::list<Event*> calendar_queue_;
     bool isConnected;
+    char ID[40];
 
     //--------------------------------------------------------------------------
     // Copy-Constructor

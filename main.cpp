@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 		return SUCCESS;
 	}
 
-	// Else load calendar.
+	// Else load calendar
 	string filename = argv[1];
 	ifstream file;
 	file.open(filename.c_str(), std::ios::in | std::ios::binary);
