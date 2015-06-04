@@ -20,6 +20,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <string.h>
 
 using std::list;
 using std::string;
@@ -62,6 +63,12 @@ const bool Calendar::getConnectionState()
 }
 
 //--------------------------------------------------------------------------
+void Calendar::getID(char* buffer)
+{
+	strcpy(buffer, ID);
+}
+
+//--------------------------------------------------------------------------
 void Calendar::setQueue(const list<Event*> calendar_queue)
 {
   calendar_queue_ = calendar_queue;
@@ -71,6 +78,12 @@ void Calendar::setQueue(const list<Event*> calendar_queue)
 void Calendar::setConnectionState(bool state)
 {
   isConnected = state;
+}
+
+//--------------------------------------------------------------------------
+void Calendar::setID(const char *IDstr)
+{
+	strcpy(ID, IDstr);
 }
 
 //--------------------------------------------------------------------------

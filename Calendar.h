@@ -63,12 +63,14 @@ class Calendar
     //
     std::list<Event*> getQueue() const;
     const bool getConnectionState();
+    void getID(char* buffer);
 
     //--------------------------------------------------------------------------
     // Setter Methods
     //
     void setQueue(const std::list<Event*> calendar_queue);
     void setConnectionState(bool);
+    void setID(const char *IDstr);
 
     //--------------------------------------------------------------------------
     // Add new event

@@ -44,13 +44,20 @@ void Signin::printUsage()
 
 void* Signin::tx_message(void* arg)
 {
+	//Variables
   thread_in thread_input = *((thread_in *)arg);
   int server_socket = thread_input.sock;
   FILE *writefp;
-  writefp = fdopen(server_socket, "w");
-  fputs("tx", writefp);
-  fputs("", writefp);
 
+  writefp = fdopen(server_socket, "w");
+  fputs("tx\n", writefp);
+  fflush(writefp);
+  char IDbuffer[40], temp[40];
+  thread_input.calendar->getID(temp);
+  strcat(IDbuffer, "\n");
+  fputs(IDbuffer, writefp);
+  fflush(writefp);
+  while(!feof(writefp));
   return NULL;
 }
 
@@ -58,7 +65,15 @@ void* Signin::rx_message(void* arg)
 {
   thread_in thread_input = *((thread_in *)arg);
 
-  cout << "Hello world";
+  int server_socket = thread_input.sock;
+  FILE *writefp;
+  writefp = fdopen(server_socket, "w");
+  fputs("rx\n", writefp);
+  char IDbuffer[40], temp[40];
+  thread_input.calendar->getID(temp);
+  strcat(IDbuffer, "\n");
+  fputs(IDbuffer, writefp);
+  while(!feof(writefp));
   return NULL;
 }
 
@@ -71,6 +86,10 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
     printUsage();
     return ERROR;
   }
+
+  //--------------------------------------------------
+  //---------Save ID
+  calendar.setID(params[0].c_str());
 
   //--------------------------------------------------
   //---------Variables
@@ -117,16 +136,19 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
 
   //--------------------------------------------------
   //---------Create Threads
-  thread_in tx_thread_input, rx_thread_input;
-  tx_thread_input.calendar = &(calendar);
-  tx_thread_input.sock = sock_tx;
-  rx_thread_input.calendar = &(calendar);
-  rx_thread_input.sock = sock_rx;
+  thread_in *tx_thread_input, *rx_thread_input;
+  tx_thread_input = (thread_in *)malloc(sizeof(thread_in));
+  rx_thread_input = (thread_in *)malloc(sizeof(thread_in));
+
+  tx_thread_input->calendar = &(calendar);
+  tx_thread_input->sock = sock_tx;
+  rx_thread_input->calendar = &(calendar);
+  rx_thread_input->sock = sock_rx;
 
   pthread_create( &tx_thread, NULL, Signin::tx_message,
-      (void *) &tx_thread_input);
+      (void *) tx_thread_input);
   pthread_create( &rx_thread, NULL, Signin::rx_message,
-      (void *) &rx_thread_input);
+      (void *) rx_thread_input);
 
   calendar.setConnectionState(true);
   return SUCCESS;

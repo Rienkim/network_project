@@ -30,6 +30,8 @@ void runServer()
 	error_handling("mutex error");
 
 	serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+	int option = 1;
+	setsockopt( serv_sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) );
 
 	//Server Address Setting
 	memset(&serv_addr, 0x00, sizeof(serv_addr));
@@ -58,10 +60,12 @@ void runServer()
 		fgets(message, BUFSIZE - 1, readfp);
 
 		//Client TX Connected
-		if(strcmp(message,"tx")==0)
+		if(strcmp(message,"tx\n")==0)
 		{
+			cout<<"tx detected"<<endl;
 			int count;
 			fgets(message, BUFSIZE - 1, readfp);
+			cout<<"message : "<<message<<endl;
 			for(count=0;count<clnt_number;count++)
 			{
 				//If there exists same ID
@@ -73,8 +77,9 @@ void runServer()
 						clnt_state[count] = TXRXBOTH;
 						pthread_create(&thread, NULL, clnt_tx_connection,
 								(void *) clnt_sock);
-						pthread_create(&thread, NULL, clnt_tx_connection,
+						pthread_create(&thread, NULL, clnt_rx_connection,
 								(void *) clnt_sock);
+						cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
 						break;
 					}
 					else if(clnt_state[count]==TXONLY || clnt_state[count]==TXRXBOTH)
@@ -95,10 +100,12 @@ void runServer()
 		}
 
 		//Client RX connected
-		else if(strcmp(message,"rx")==0)
+		else if(strcmp(message,"rx\n")==0)
 		{
+			cout<<"rx detected"<<endl;
 			int count;
 			fgets(message, BUFSIZE - 1, readfp);
+			cout<<"message : "<<message<<endl;
 			for(count=0;count<clnt_number;count++)
 			{
 				//If there exists same ID
@@ -110,8 +117,9 @@ void runServer()
 						clnt_state[count] = TXRXBOTH;
 						pthread_create(&thread, NULL, clnt_tx_connection,
 								(void *) clnt_sock);
-						pthread_create(&thread, NULL, clnt_tx_connection,
+						pthread_create(&thread, NULL, clnt_rx_connection,
 								(void *) clnt_sock);
+						cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
 						break;
 					}
 					else if(clnt_state[count]==RXONLY || clnt_state[count]==TXRXBOTH)
@@ -131,14 +139,10 @@ void runServer()
 			}
 		}
 
+		fclose(readfp);
 		pthread_mutex_lock(&mutx);
 		pthread_mutex_unlock(&mutx);
 
-		pthread_create(&thread, NULL, clnt_tx_connection,
-				(void *) clnt_sock);
-		pthread_create(&thread, NULL, clnt_tx_connection,
-				(void *) clnt_sock);
-		cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
 	}
 }
 
