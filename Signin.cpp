@@ -37,43 +37,86 @@ Signin::~Signin() throw()
 {
 }
 
+//------------------------------------------------------------------------------
 void Signin::printUsage()
 {
   cout << "Usage : signin <IP> <Port>" << endl;
 }
 
+//------------------------------------------------------------------------------
 void* Signin::tx_message(void* arg)
 {
 	//Variables
   thread_in thread_input = *((thread_in *)arg);
   int server_socket = thread_input.sock;
-  FILE *writefp;
+  char ack_buffer[10];
 
-  writefp = fdopen(server_socket, "w");
-  fputs("tx\n", writefp);
-  fflush(writefp);
-  char IDbuffer[40], temp[40];
-  thread_input.calendar->getID(temp);
-  strcat(IDbuffer, "\n");
-  fputs(IDbuffer, writefp);
-  fflush(writefp);
-  while(!feof(writefp));
+  //Handshake : Send TX
+  write(server_socket, "tx", 3);
+  read(server_socket, ack_buffer, sizeof(ack_buffer));
+  if(strcmp(ack_buffer,"ack")!=0)
+  {
+	  cout<<"Handshake Error : Tx ack"<<endl;
+	  return NULL;
+  }
+  //Handshake : Send ID
+  char IDbuffer[40];
+  thread_input.calendar->getID(IDbuffer);
+  write(server_socket, IDbuffer, 40);
+  read(server_socket, ack_buffer, sizeof(ack_buffer));
+  if(strcmp(ack_buffer,"ack")!=0)
+  {
+	  cout<<"Handshake Error : Tx ID ack"<<endl;
+	  return NULL;
+  }
+
+  cout<<"Client tx successfully connected to server"<<endl;
+
+  //tx Communication
+  while(read(server_socket, ack_buffer, sizeof(ack_buffer))!=0)
+  {
+	  //TODO : Implement tx communication between serv, clnt
+
+  }
   return NULL;
 }
 
+
+//------------------------------------------------------------------------------
 void* Signin::rx_message(void* arg)
 {
+	//Variables
   thread_in thread_input = *((thread_in *)arg);
-
   int server_socket = thread_input.sock;
-  FILE *writefp;
-  writefp = fdopen(server_socket, "w");
-  fputs("rx\n", writefp);
-  char IDbuffer[40], temp[40];
-  thread_input.calendar->getID(temp);
-  strcat(IDbuffer, "\n");
-  fputs(IDbuffer, writefp);
-  while(!feof(writefp));
+  char ack_buffer[10];
+
+  //Handshake : Send TX
+  write(server_socket, "rx", 3);
+  read(server_socket, ack_buffer, sizeof(ack_buffer));
+  if(strcmp(ack_buffer,"ack")!=0)
+  {
+	  cout<<"Handshake Error : Rx ack"<<endl;
+	  return NULL;
+  }
+  //Handshake : Send ID
+  char IDbuffer[40];
+  thread_input.calendar->getID(IDbuffer);
+  write(server_socket, IDbuffer, 40);
+  read(server_socket, ack_buffer, sizeof(ack_buffer));
+  if(strcmp(ack_buffer,"ack")!=0)
+  {
+	  cout<<"Handshake Error : Tx ID ack"<<endl;
+	  return NULL;
+  }
+
+  cout<<"Client rx successfully connected to server"<<endl;
+
+  //rx Communication
+  while(read(server_socket, ack_buffer, sizeof(ack_buffer))!=0)
+  {
+	  //TODO : Implement rx communication between serv, clnt
+
+  }
   return NULL;
 }
 

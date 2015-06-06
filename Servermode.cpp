@@ -48,7 +48,6 @@ void runServer()
 	//Connects Client
 	char message[BUFSIZE];
 	char ID[40];
-	FILE * readfp;
 
 	while (1)
 	{
@@ -56,16 +55,16 @@ void runServer()
 		clnt_sock = accept(serv_sock, (struct sockaddr *) &clnt_addr,
 				&clnt_addr_size);
 
-		readfp = fdopen(clnt_sock, "r");
-		fgets(message, BUFSIZE - 1, readfp);
+		read(clnt_sock, message, BUFSIZE);
 
 		//Client TX Connected
-		if(strcmp(message,"tx\n")==0)
+		if(strcmp(message,"tx")==0)
 		{
 			cout<<"tx detected"<<endl;
+			write(clnt_sock, "ack", 4);
 			int count;
-			fgets(message, BUFSIZE - 1, readfp);
-			cout<<"message : "<<message<<endl;
+			read(clnt_sock, message, BUFSIZE);
+			cout<<"ID : "<<message<<endl;
 			for(count=0;count<clnt_number;count++)
 			{
 				//If there exists same ID
@@ -80,12 +79,12 @@ void runServer()
 						pthread_create(&thread, NULL, clnt_rx_connection,
 								(void *) clnt_sock);
 						cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
+						write(clnt_sock, "ack", 4);
 						break;
 					}
 					else if(clnt_state[count]==TXONLY || clnt_state[count]==TXRXBOTH)
 					{
 						close(clnt_sock);
-						fclose(readfp);
 						break;
 					}
 				}
@@ -95,16 +94,18 @@ void runServer()
 					clnt_state[clnt_number] = TXONLY;
 					strcpy(clnt_ID[clnt_number], message);
 					clnt_tx_socks[clnt_number++] = clnt_sock;
+					write(clnt_sock, "ack", 4);
 				}
 			}
 		}
 
 		//Client RX connected
-		else if(strcmp(message,"rx\n")==0)
+		else if(strcmp(message,"rx")==0)
 		{
 			cout<<"rx detected"<<endl;
+			write(clnt_sock, "ack", 4);
 			int count;
-			fgets(message, BUFSIZE - 1, readfp);
+			read(clnt_sock, message, BUFSIZE);
 			cout<<"message : "<<message<<endl;
 			for(count=0;count<clnt_number;count++)
 			{
@@ -120,12 +121,12 @@ void runServer()
 						pthread_create(&thread, NULL, clnt_rx_connection,
 								(void *) clnt_sock);
 						cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
+						write(clnt_sock, "ack", 4);
 						break;
 					}
 					else if(clnt_state[count]==RXONLY || clnt_state[count]==TXRXBOTH)
 					{
 						close(clnt_sock);
-						fclose(readfp);
 						break;
 					}
 				}
@@ -135,11 +136,11 @@ void runServer()
 					clnt_state[clnt_number] = RXONLY;
 					strcpy(clnt_ID[clnt_number], message);
 					clnt_tx_socks[clnt_number++] = clnt_sock;
+					write(clnt_sock, "ack", 4);
 				}
 			}
 		}
 
-		fclose(readfp);
 		pthread_mutex_lock(&mutx);
 		pthread_mutex_unlock(&mutx);
 

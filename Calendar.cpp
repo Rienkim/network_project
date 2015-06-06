@@ -17,6 +17,7 @@
 #include "Update.h"
 #include "Save.h"
 #include "Signin.h"
+#include "Sync.h"
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -145,6 +146,7 @@ int Calendar::run()
   Command* save = new Save("Save");
   Command* whois = new Whois("Whois");
   Command* signin = new Signin("Signin");
+  Command* sync = new Sync("Sync");
 
   stringstream divide_buffer;
   int error = 0;
@@ -161,6 +163,7 @@ int Calendar::run()
   commands["save"] = save;
   commands["whois"] = whois;
   commands["signin"] = signin;
+  commands["sync"] = sync;
 
 // loop stops if quit.loop_ gets 0
   while(dynamic_cast<Quit*>(quit)->getLoop())
@@ -221,6 +224,7 @@ int Calendar::run()
   delete save;
   delete whois;
   delete signin;
+  delete sync;
 
   return SUCCESS; // return 0 if success
 }
