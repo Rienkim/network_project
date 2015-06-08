@@ -77,9 +77,9 @@ void runServer()
 						clnt_tx_socks[count]=clnt_sock;
 						clnt_state[count] = TXRXBOTH;
 						pthread_create(&thread, NULL, clnt_tx_connection,
-								(void *) clnt_sock);
+								(void *) &clnt_sock);
 						pthread_create(&thread, NULL, clnt_rx_connection,
-								(void *) clnt_sock);
+								(void *) &clnt_sock);
 						cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
 						write(clnt_sock, "ack", 4);
 						break;
@@ -120,9 +120,9 @@ void runServer()
 						clnt_tx_socks[count]=clnt_sock;
 						clnt_state[count] = TXRXBOTH;
 						pthread_create(&thread, NULL, clnt_tx_connection,
-								(void *) clnt_sock);
+								(void *) &clnt_sock);
 						pthread_create(&thread, NULL, clnt_rx_connection,
-								(void *) clnt_sock);
+								(void *) &clnt_sock);
 						cout << "New Connection : IP: " << inet_ntoa(clnt_addr.sin_addr)<< endl;
 						write(clnt_sock, "ack", 4);
 						break;
