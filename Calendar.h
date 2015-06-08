@@ -12,14 +12,16 @@
 #define CALENDAR_H
 
 #include <list>
+#include <iostream>
+#include <vector>
+#include <pthread.h>
+using namespace std;
+
 
 const int SUCCESS = 0;
 const int ERROR = 1;
 
 class Event;
-
-//------------------------------------------------------------------------------
-// Day
 // This class represents a calendar day.
 //
 //
@@ -27,8 +29,12 @@ class Calendar
 {//suck joon ba bo
   private:
     std::list<Event*> calendar_queue_;
-    bool isConnected;
     char ID[40];
+    bool isConnected;
+    string recvdata;
+    string command;
+    vector<string> data;
+    pthread_mutex_t mutx;
 
     //--------------------------------------------------------------------------
     // Copy-Constructor
@@ -64,6 +70,9 @@ class Calendar
     std::list<Event*> getQueue() const;
     const bool getConnectionState();
     void getID(char* buffer);
+    void getSendData(string& command_input, vector<string>& data_input);
+    void getRecvData(string& data_input);
+    void lockMutex();
 
     //--------------------------------------------------------------------------
     // Setter Methods
@@ -71,6 +80,14 @@ class Calendar
     void setQueue(const std::list<Event*> calendar_queue);
     void setConnectionState(bool);
     void setID(const char *IDstr);
+    void setSendData(string command_input, vector<string> data_input);
+    void setRecvData(string data_input);
+    void unlockMutex();
+
+    //--------------------------------------------------------------------------
+    // Check whether overlap or not
+    //
+    bool isOverlap(vector<string> event_string);
 
     //--------------------------------------------------------------------------
     // Add new event

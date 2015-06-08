@@ -70,6 +70,21 @@ void Calendar::getID(char* buffer)
 }
 
 //--------------------------------------------------------------------------
+void Calendar::getSendData(string& command_input, vector<string>& data_input)
+{
+	pthread_mutex_unlock(&mutx);
+	command_input = command;
+	data_input = data;
+	pthread_mutex_unlock(&mutx);
+}
+
+//--------------------------------------------------------------------------
+void Calendar::getRecvData(string& data_input)
+{
+	data_input = recvdata;
+}
+
+//--------------------------------------------------------------------------
 void Calendar::setQueue(const list<Event*> calendar_queue)
 {
   calendar_queue_ = calendar_queue;
@@ -88,6 +103,58 @@ void Calendar::setID(const char *IDstr)
 }
 
 //--------------------------------------------------------------------------
+void Calendar::setSendData(string command_input, vector<string> data_input)
+{
+	pthread_mutex_lock(&mutx);
+	command = command_input;
+	data = data_input;
+	pthread_mutex_unlock(&mutx);
+}
+
+//--------------------------------------------------------------------------
+void Calendar::setRecvData(string data_input)
+{
+	recvdata = data_input;
+}
+
+void Calendar::lockMutex()
+{
+	pthread_mutex_lock(&mutx);
+}
+
+void Calendar::unlockMutex()
+{
+	pthread_mutex_unlock(&mutx);
+}
+
+bool Calendar::isOverlap(vector<string> event_string)
+{
+	  bool inserted = false;
+	  Event event;
+	  event.stringToEvent(event_string);
+
+	  for(list<Event*>::iterator it = calendar_queue_.begin();
+	      it != calendar_queue_.end(); ++it)
+	  {
+	    int ret = ( *it)->compareEvent(&event);
+
+	    if(ret == OVERLAP)
+	    {
+	      cout << "Event could not be added to calendar due to overlapping with: "
+	          << endl;
+	      ( *it)->printInfo();
+	      return true;
+	    }
+
+	    if(ret == LATER)
+	      continue;
+
+	    // TODO: WAIT FOR REPLY OF SERVER. IF YES INSERT, IF NO DELETE EVENT.
+	    return false;
+	  }
+
+	return false;
+}
 
 void Calendar::addEvent(Event* event, bool wait_server)
 {
