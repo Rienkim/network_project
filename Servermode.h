@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 using namespace std;
 
 //----------------------------------------
@@ -44,6 +45,8 @@ extern int clnt_rx_socks[10];
 extern int clnt_state[10];
 extern char clnt_ID[10][40];
 extern pthread_mutex_t mutx;
+extern bool isAllClientNotified;
+extern  vector<string> eventdata;
 
 
 #endif /* SERVERMODE_H_ */

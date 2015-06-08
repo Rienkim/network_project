@@ -73,6 +73,12 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
 	  while(1)
 	  {
 		  calendar.getRecvData(recvdata_out);
+
+		  //TODO: Debugging
+		  cout<<recvdata_out<<endl;
+		  sleep(1);
+		  ///////
+
 		  if(recvdata_out=="yes")
 		  {
 			  calendar.addEvent(event, false);
