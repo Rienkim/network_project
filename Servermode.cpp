@@ -51,7 +51,7 @@ void runServer()
 	//Connects Client
 	char message[BUFSIZE];
 
-	while (1)
+	while (isAlive(clnt_sock))
 	{
 		clnt_addr_size = sizeof(clnt_addr);
 		clnt_sock = accept(serv_sock, (struct sockaddr *) &clnt_addr,
@@ -157,7 +157,7 @@ void * clnt_tx_connection(void * arg)
 	int i;
 	int error = 0;
 	socklen_t len = sizeof (error);
-	while (getsockopt (clnt_sock, SOL_SOCKET, SO_ERROR, &error, &len )!=0)
+	while (isAlive(clnt_sock))
 	{
 		read(clnt_sock, message, sizeof(message));
 		if(strcmp(message,"sync")==0)
@@ -165,7 +165,7 @@ void * clnt_tx_connection(void * arg)
 			write(clnt_sock, "ack", 4);
 			//Read Sync Data from client
 			vector<string> recvdata;
-			while(getsockopt (clnt_sock, SOL_SOCKET, SO_ERROR, &error, &len )!=0)
+			while(isAlive(clnt_sock))
 			{
 				read(clnt_sock, message, sizeof(message));
 				if(strcmp(message, "end")==0)
@@ -282,7 +282,7 @@ void * clnt_rx_connection(void * arg)
 			index = i;
 	}
 
-	while (getsockopt (clnt_sock, SOL_SOCKET, SO_ERROR, &error, &len )!=0)
+	while (isAlive(clnt_sock))
 	{
 		if(clnt_command[index]==1)
 		{

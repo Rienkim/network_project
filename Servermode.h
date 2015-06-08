@@ -36,6 +36,7 @@ void* clnt_rx_connection(void* arg);
 void send_message(char* message, int len);
 void error_handling(const char* message);
 void runServer();
+bool isAlive(int sock);
 
 //----------------------------------------
 //---Variables
