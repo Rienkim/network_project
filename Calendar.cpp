@@ -22,6 +22,8 @@
 #include <map>
 #include <sstream>
 #include <string.h>
+#include <signal.h>
+#include <stdlib.h>
 
 using std::list;
 using std::string;
@@ -49,6 +51,13 @@ Calendar::~Calendar() throw()
   for(list<Event*>::const_iterator it = calendar_queue_.begin();
       it != calendar_queue_.end(); ++it)
     delete ( *it);
+
+  if(isConnected)
+  {
+    write(server_com_sock_, "close", 6);
+    close(server_com_sock_);
+  }
+  exit(1);
 }
 
 //--------------------------------------------------------------------------
@@ -66,22 +75,34 @@ const bool Calendar::getConnectionState()
 //--------------------------------------------------------------------------
 void Calendar::getID(char* buffer)
 {
-	strcpy(buffer, ID);
+  strcpy(buffer, ID);
 }
 
 //--------------------------------------------------------------------------
 void Calendar::getSendData(string& command_input, vector<string>& data_input)
 {
-	pthread_mutex_unlock(&mutx);
-	command_input = command;
-	data_input = data;
-	pthread_mutex_unlock(&mutx);
+  pthread_mutex_unlock( &mutx);
+  command_input = command;
+  data_input = data;
+  pthread_mutex_unlock( &mutx);
 }
 
 //--------------------------------------------------------------------------
 void Calendar::getRecvData(string& data_input)
 {
-	data_input = recvdata;
+  data_input = recvdata;
+}
+
+//--------------------------------------------------------------------------
+int Calendar::getServerSock()
+{
+  return server_com_sock_;
+}
+
+//--------------------------------------------------------------------------
+pthread_t Calendar::getServerThread()
+{
+  return server_com_thread_;
 }
 
 //--------------------------------------------------------------------------
@@ -99,64 +120,74 @@ void Calendar::setConnectionState(bool state)
 //--------------------------------------------------------------------------
 void Calendar::setID(const char *IDstr)
 {
-	strcpy(ID, IDstr);
+  strcpy(ID, IDstr);
 }
 
 //--------------------------------------------------------------------------
 void Calendar::setSendData(string command_input, vector<string> data_input)
 {
-	pthread_mutex_lock(&mutx);
-	command = command_input;
-	data = data_input;
-	pthread_mutex_unlock(&mutx);
+  pthread_mutex_lock( &mutx);
+  command = command_input;
+  data = data_input;
+  pthread_mutex_unlock( &mutx);
 }
 
 //--------------------------------------------------------------------------
 void Calendar::setRecvData(string data_input)
 {
-	recvdata = data_input;
+  recvdata = data_input;
 }
 
+//--------------------------------------------------------------------------
+void Calendar::setServerSock(int sock)
+{
+  server_com_sock_ = sock;
+}
+
+//--------------------------------------------------------------------------
+void Calendar::setServerThread(pthread_t id)
+{
+  server_com_thread_ = id;
+}
+
+//--------------------------------------------------------------------------
 void Calendar::lockMutex()
 {
-	pthread_mutex_lock(&mutx);
+  pthread_mutex_lock( &mutx);
 }
 
 void Calendar::unlockMutex()
 {
-	pthread_mutex_unlock(&mutx);
+  pthread_mutex_unlock( &mutx);
 }
 
-bool Calendar::isOverlap(vector<string> event_string)
+bool Calendar::isOverlap(Event* event)
 {
-	  bool inserted = false;
-	  Event event;
-	  event.stringToEvent(event_string);
+  for(list<Event*>::iterator it = calendar_queue_.begin();
+      it != calendar_queue_.end(); ++it)
+  {
+    int ret = ( *it)->compareEvent(event);
 
-	  for(list<Event*>::iterator it = calendar_queue_.begin();
-	      it != calendar_queue_.end(); ++it)
-	  {
-	    int ret = ( *it)->compareEvent(&event);
+    if(ret == OVERLAP)
+    {
+      cout << "Event could not be added to calendar due to overlapping with: "
+          << endl;
+      ( *it)->printInfo();
+      return true;
+    }
 
-	    if(ret == OVERLAP)
-	    {
-	      cout << "Event could not be added to calendar due to overlapping with: "
-	          << endl;
-	      ( *it)->printInfo();
-	      return true;
-	    }
+    if(ret == LATER)
+      continue;
 
-	    if(ret == LATER)
-	      continue;
+    // Earlier
+    return false;
+  }
 
-	    // TODO: WAIT FOR REPLY OF SERVER. IF YES INSERT, IF NO DELETE EVENT.
-	    return false;
-	  }
-
-	return false;
+  // Last event
+  return false;
 }
 
-void Calendar::addEvent(Event* event, bool wait_server)
+void Calendar::addEvent(Event* event)
 {
   bool inserted = false;
 
@@ -172,32 +203,20 @@ void Calendar::addEvent(Event* event, bool wait_server)
       ( *it)->printInfo();
       delete event;
 
-      // TODO: TELL SERVER THAT EVENT CANNOT BE SCHEDULED!
-
       return;
     }
 
     if(ret == LATER)
       continue;
 
-    // Else insert event here.
-    // TODO: TELL SEVER THAT INSERT IS POSSIBLE.
-    while(wait_server);
-
-    // TODO: WAIT FOR REPLY OF SERVER. IF YES INSERT, IF NO DELETE EVENT.
     calendar_queue_.insert(it, event);
     inserted = true;
     break;
   }
 
   if( !inserted)
-  {
-    // TODO: TELL SEVER THAT INSERT IS POSSIBLE.
-    while(wait_server);
-
-    // TODO: WAIT FOR REPLY OF SERVER. IF YES INSERT, IF NO DELETE.
     calendar_queue_.push_back(event);
-  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -216,7 +235,6 @@ int Calendar::run()
   Command* sync = new Sync("Sync");
 
   stringstream divide_buffer;
-  int error = 0;
   string current_command;
   string input;
   string token;
@@ -267,7 +285,7 @@ int Calendar::run()
     if(commands.find(current_command) != commands.end())
     {
       actual = commands.find(current_command)->second;
-      error = actual->execute( *this, parameter);
+      actual->execute( *this, parameter);
     }
     else
     {
@@ -280,7 +298,6 @@ int Calendar::run()
     current_command.clear();
     input.clear();
     divide_buffer.clear();
-    error = SUCCESS;
   }
 
   //free used Pointers
@@ -312,6 +329,71 @@ void Calendar::updateCalendar()
 
   event_now->setStartTime(NULL);
   delete event_now;
+}
+
+//--------------------------------------------------------------------------
+void* Calendar::serverCom(void *)
+{
+  while(1)
+  {
+    char buffer[5];
+    int ret = recv(server_com_sock_, buffer, 5, MSG_PEEK | MSG_DONTWAIT);
+    if(ret <= 0 || strcmp(buffer, "sync") != 0)
+      continue;
+
+    // Sync request.
+    read(server_com_sock_, buffer, 5);
+    cout << "Sync request received" << endl;
+
+    write(server_com_sock_, "ack", 4);
+
+    vector<string> data;
+
+    char d_buffer[100] = { 0 };
+    read(server_com_sock_, d_buffer, 100);
+    while(strcmp(d_buffer, "ended") != 0)
+    {
+      cout << "Received data: " << d_buffer << endl;
+      data.push_back(string(d_buffer));
+      memset( &d_buffer[0], 0, sizeof(d_buffer));
+      write(server_com_sock_, "ack", 4);
+      read(server_com_sock_, d_buffer, 100);
+    }
+
+    cout << "Receive ended" << endl;
+
+    if(data.size() != 4)
+      cout << "Communication Error: Not all data received!" << endl;
+
+    Event* event = new Event();
+    event->stringToEvent(data);
+
+    if(isOverlap(event))
+    {
+      delete event;
+      write(server_com_sock_, "delete", 7);
+      cout << "sent delete" << endl;
+      continue;
+    }
+
+    cout << "sent create" << endl;
+    write(server_com_sock_, "create", 7);
+    cout << "Wait for create/delete" << endl;
+    read(server_com_sock_, d_buffer, 7);
+
+    if(strcmp(d_buffer, "create") == 0)
+    {
+      cout << "Received create" << endl;
+      addEvent(event);
+    }
+    if(strcmp(d_buffer, "delete") == 0)
+    {
+      cout << "Received delete" << endl;
+      delete event;
+    }
+
+  }
+  return NULL;
 }
 
 //--------------------------------------------------------------------------

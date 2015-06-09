@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
 
 		Calendar calendar(calendar_queue);
 
-		calendar.addEvent(event1, false);
-		calendar.addEvent(event2, false);
+		calendar.addEvent(event1);
+		calendar.addEvent(event2);
 
 		calendar.run();
 		return SUCCESS;

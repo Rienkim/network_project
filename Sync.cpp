@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <unistd.h>
 
 using std::string;
 using std::vector;
@@ -35,15 +36,15 @@ Sync::~Sync() throw()
 //------------------------------------------------------------------------------
 void Sync::printUsage()
 {
-	  cout << "Usage: create <event name> <start time (hour-min 24-hour format)> "
-	      << "<start date (dd-mm-yyyy)> <duration in minutes (max 24*60)> <IDs(id1,id2,...)>" << endl;
+  cout << "Usage: create <event name> <start time (hour-min 24-hour format)> "
+      << "<start date (dd-mm-yyyy)> <duration in minutes (max 24*60)> <IDs(id1,id2,...)>"
+      << endl;
 }
-
 
 //------------------------------------------------------------------------------
 int Sync::execute(Calendar& calendar, vector<string> &params)
 {
-  if(params.size() != 5)
+  if(params.size() < 5)
   {
     cout << params.size() << endl;
     printUsage();
@@ -68,34 +69,55 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
   // Event is in future.===========================================
   if(event_now->compareEvent(event) != EARLIER)
   {
-	  calendar.setSendData(string("sync"), params);
-	  string recvdata_out;
-	  while(1)
-	  {
-		  calendar.getRecvData(recvdata_out);
+    if(calendar.isOverlap(event))
+      return ERROR;
 
-		  //TODO: Debugging
-		  cout<<recvdata_out<<endl;
-		  sleep(1);
-		  ///////
+    char buffer[7] = { 0 };
+    write(calendar.getServerSock(), "sync", 5);
 
-		  if(recvdata_out=="yes")
-		  {
-			  calendar.addEvent(event, false);
-			  cout<<"event added"<<endl;
-			  break;
-		  }
-		  else if(recvdata_out=="no")
-		  {
-			  cout<<"event addition failed"<<endl;
-			  break;
-		  }
-		  else if(recvdata_out=="lost")
-		  {
-			  cout<<"connection lost"<<endl;
-			  break;
-		  }
-	  }
+    read(calendar.getServerSock(), buffer, 7);
+    if(strcmp(buffer, "ack") != 0)
+    {
+      cout << "Handshake Error : sync not ack" << endl;
+      return ERROR;
+    }
+    cout << "sync is ack" << endl;
+
+    for(unsigned int i = 0; i < params.size(); i++)
+    {
+      char ack_buffer[4] = { 0 };
+      write(calendar.getServerSock(), params[i].c_str(),
+          strlen(params[i].c_str()) + 1);
+
+      read(calendar.getServerSock(), ack_buffer, 4);
+      if(strcmp(ack_buffer, "ack") != 0)
+      {
+        cout << "Handshake Error : data write ack" << endl;
+        return ERROR;
+      }
+      cout << "data is ack" << endl;
+    }
+
+    write(calendar.getServerSock(), "ended", 6);
+    read(calendar.getServerSock(), buffer, 7);
+
+    if((strcmp(buffer, "delete") == 0))
+    {
+      cout << "Event not created because of conflict with other client!" << endl;
+      delete event;
+    }
+
+    if((strcmp(buffer, "create") == 0))
+    {
+      cout << "Event was created and synced with other clients!" << endl;
+      calendar.addEvent(event);
+    }
+
+    if((strcmp(buffer, "delete") != 0) && (strcmp(buffer, "create") != 0))
+    {
+      cout << "Handshake Error : sync end ack" << endl;
+      return ERROR;
+    }
   }
 
   else
@@ -109,6 +131,4 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
 
   return SUCCESS;
 }
-
-
 

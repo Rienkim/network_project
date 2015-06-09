@@ -14,7 +14,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <cstdlib>
-#include <errno.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 using std::string;
 using std::vector;
@@ -27,19 +30,6 @@ typedef struct thread_in_
     Calendar* calendar;
     int sock;
 } thread_in;
-
-bool isAlive(int sock)
-{
-  char buf;
-  int ret = recv(sock, &buf, 1, MSG_PEEK | MSG_DONTWAIT);
-  if(ret == - 1)
-  {
-    if(errno == ENOTCONN)
-      return false;
-  }
-
-  return true;
-}
 
 //------------------------------------------------------------------------------
 Signin::Signin(const string& name)
@@ -59,7 +49,7 @@ void Signin::printUsage()
 }
 
 //------------------------------------------------------------------------------
-void* Signin::tx_message(void* arg)
+/*void* Signin::tx_message(void* arg)
 {
   //Variables
   thread_in thread_input = *((thread_in *)arg);
@@ -219,11 +209,21 @@ void* Signin::rx_message(void* arg)
   }
   cout << "end of rx connection" << endl;
   return NULL;
+}*/
+
+
+//--------------------------------------------------------------------------
+static void* threadFunc(void * object)
+{
+    return ((Calendar *) object)->serverCom(NULL);
 }
 
 //------------------------------------------------------------------------------
 int Signin::execute(Calendar& calendar, vector<string> &params)
 {
+  if(calendar.getConnectionState())
+    return ERROR;
+
   if(params.size() != 3)
   {
     cout << params.size() << endl;
@@ -237,24 +237,15 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
 
   //--------------------------------------------------
   //---------Variables
-  int sock_tx, sock_rx;
+  int sock;
   struct sockaddr_in serv_addr;
-  pthread_t tx_thread, rx_thread;
-  void * thread_result;
 
   //--------------------------------------------------
   //---------Creating Socket
-  sock_tx = socket(PF_INET, SOCK_STREAM, 0);
-  sock_rx = socket(PF_INET, SOCK_STREAM, 0);
-  if(sock_tx == -1)
+  sock = socket(PF_INET, SOCK_STREAM, 0);
+  if(sock == -1)
   {
     cout << "Socket() Error" << endl;
-    return ERROR;
-  }
-  if(sock_rx == -1)
-  {
-    cout << "Socket() Error" << endl;
-    close(sock_tx);
     return ERROR;
   }
 
@@ -265,35 +256,47 @@ int Signin::execute(Calendar& calendar, vector<string> &params)
   serv_addr.sin_port = htons(atoi(params[2].c_str()));
   serv_addr.sin_addr.s_addr = inet_addr(params[1].c_str());
 
-  if(connect(sock_tx, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1)
+  if(connect(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1)
   {
     cout << "tx_connect() error" << endl;
     return ERROR;
   }
-  if(connect(sock_rx, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) == -1)
+
+  char ack_buffer[10];
+
+  //Handshake : Send con
+  write(sock, "con", 3);
+
+  read(sock, ack_buffer, sizeof(ack_buffer));
+  if(strcmp(ack_buffer, "ack") != 0)
   {
-    cout << "rx_connect() error" << endl;
-    close(sock_tx);
+    cout << "Handshake Error : con not ack" << endl;
     return ERROR;
   }
+  cout << "Received ack on con" << endl;
 
-  //--------------------------------------------------
-  //---------Create Threads
-  thread_in *tx_thread_input, *rx_thread_input;
-  tx_thread_input = (thread_in *)malloc(sizeof(thread_in));
-  rx_thread_input = (thread_in *)malloc(sizeof(thread_in));
+  //Handshake : Send ID
+  char IDbuffer[40];
+  calendar.getID(IDbuffer);
+  write(sock, IDbuffer, 40);
 
-  tx_thread_input->calendar = &(calendar);
-  tx_thread_input->sock = sock_tx;
-  rx_thread_input->calendar = &(calendar);
-  rx_thread_input->sock = sock_rx;
+  read(sock, ack_buffer, sizeof(ack_buffer));
+  if(strcmp(ack_buffer, "ack") != 0)
+  {
+    cout << "Handshake Error : ID not ack" << endl;
+    return ERROR;
+  }
+  cout << "Received ack on ID" << endl;
 
-  pthread_create( &tx_thread, NULL, Signin::tx_message,
-      (void *)tx_thread_input);
-  pthread_create( &rx_thread, NULL, Signin::rx_message,
-      (void *)rx_thread_input);
+  cout << "Client successfully connected to server!" << endl;
 
+  calendar.setServerSock(sock);
   calendar.setConnectionState(true);
+
+  pthread_t server_com;
+  pthread_create(&server_com, NULL, threadFunc, &calendar);
+  calendar.setServerThread(server_com);
+
   return SUCCESS;
 }
 

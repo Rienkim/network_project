@@ -17,7 +17,6 @@
 #include <pthread.h>
 using namespace std;
 
-
 const int SUCCESS = 0;
 const int ERROR = 1;
 
@@ -26,10 +25,12 @@ class Event;
 //
 //
 class Calendar
-{//suck joon ba bo
+{ //suck joon ba bo
   private:
     std::list<Event*> calendar_queue_;
     char ID[40];
+    int server_com_sock_;
+    pthread_t server_com_thread_;
     bool isConnected;
     string recvdata;
     string command;
@@ -72,6 +73,8 @@ class Calendar
     void getID(char* buffer);
     void getSendData(string& command_input, vector<string>& data_input);
     void getRecvData(string& data_input);
+    int getServerSock();
+    pthread_t getServerThread();
     void lockMutex();
 
     //--------------------------------------------------------------------------
@@ -82,17 +85,19 @@ class Calendar
     void setID(const char *IDstr);
     void setSendData(string command_input, vector<string> data_input);
     void setRecvData(string data_input);
+    void setServerSock(int sock);
+    void setServerThread(pthread_t id);
     void unlockMutex();
 
     //--------------------------------------------------------------------------
     // Check whether overlap or not
     //
-    bool isOverlap(vector<string> event_string);
+    bool isOverlap(Event* event);
 
     //--------------------------------------------------------------------------
     // Add new event
     //
-    void addEvent(Event* event, bool wait_server);
+    void addEvent(Event* event);
 
     //--------------------------------------------------------------------------
     // Function to start the calendar.
@@ -103,6 +108,11 @@ class Calendar
     // Delete old events and set next event pointer.
     //
     void updateCalendar();
+
+    //--------------------------------------------------------------------------
+    // Communicate with the server.
+    //
+    void* serverCom(void *);
 
     //--------------------------------------------------------------------------
     // Print Events of Calendar

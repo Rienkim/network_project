@@ -11,13 +11,6 @@
 
 #include "Command.h"
 
-//Headers for socket comm
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <pthread.h>
-
 //------------------------------------------------------------------------------
 // Signin Class inherited from Command-Class
 // Representing the "Signin" command called from calendar.run()
@@ -48,13 +41,13 @@ class Signin : public Command
     //
     virtual ~Signin() throw();
 
-    //
+    //--------------------------------------------------------------------------
     void printUsage();
 
     //--------------------------------------------------------------------------
     // Send, Receive Thread Function
-    static void *tx_message(void* arg);
-    static void *rx_message(void *arg);
+    //static void *tx_message(void* arg);
+    //static void *rx_message(void *arg);
 
     //--------------------------------------------------------------------------
     // Virtual Function from Command-Class executing Command

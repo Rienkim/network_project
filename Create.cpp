@@ -63,7 +63,7 @@ int Create::execute(Calendar& calendar, std::vector<std::string>& params)
 
   // Event is in future.
   if(event_now->compareEvent(event) != EARLIER)
-    calendar.addEvent(event, false);
+    calendar.addEvent(event);
 
   else
   {
