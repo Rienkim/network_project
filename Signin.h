@@ -8,7 +8,6 @@
 #ifndef SIGNIN_H_
 #define SIGNIN_H_
 
-
 #include "Command.h"
 
 //------------------------------------------------------------------------------
@@ -42,12 +41,9 @@ class Signin : public Command
     virtual ~Signin() throw();
 
     //--------------------------------------------------------------------------
+    // Prints the usage of command
+    //
     void printUsage();
-
-    //--------------------------------------------------------------------------
-    // Send, Receive Thread Function
-    //static void *tx_message(void* arg);
-    //static void *rx_message(void *arg);
 
     //--------------------------------------------------------------------------
     // Virtual Function from Command-Class executing Command
@@ -59,6 +55,5 @@ class Signin : public Command
     //
     int execute(Calendar& calendar, std::vector<std::string>& params);
 };
-
 
 #endif /* SIGNIN_H_ */

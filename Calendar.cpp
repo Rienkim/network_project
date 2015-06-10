@@ -156,11 +156,13 @@ void Calendar::lockMutex()
   pthread_mutex_lock( &mutx);
 }
 
+//--------------------------------------------------------------------------
 void Calendar::unlockMutex()
 {
   pthread_mutex_unlock( &mutx);
 }
 
+//--------------------------------------------------------------------------
 bool Calendar::isOverlap(Event* event)
 {
   for(list<Event*>::iterator it = calendar_queue_.begin();
@@ -170,9 +172,6 @@ bool Calendar::isOverlap(Event* event)
 
     if(ret == OVERLAP)
     {
-      cout << "Event could not be added to calendar due to overlapping with: "
-          << endl;
-      ( *it)->printInfo();
       return true;
     }
 
@@ -187,6 +186,7 @@ bool Calendar::isOverlap(Event* event)
   return false;
 }
 
+//--------------------------------------------------------------------------
 void Calendar::addEvent(Event* event)
 {
   bool inserted = false;
@@ -343,8 +343,6 @@ void* Calendar::serverCom(void *)
 
     // Sync request.
     read(server_com_sock_, buffer, 5);
-    cout << "Sync request received" << endl;
-
     write(server_com_sock_, "ack", 4);
 
     vector<string> data;
@@ -353,14 +351,11 @@ void* Calendar::serverCom(void *)
     read(server_com_sock_, d_buffer, 100);
     while(strcmp(d_buffer, "ended") != 0)
     {
-      cout << "Received data: " << d_buffer << endl;
       data.push_back(string(d_buffer));
       memset( &d_buffer[0], 0, sizeof(d_buffer));
       write(server_com_sock_, "ack", 4);
       read(server_com_sock_, d_buffer, 100);
     }
-
-    cout << "Receive ended" << endl;
 
     if(data.size() != 4)
       cout << "Communication Error: Not all data received!" << endl;
@@ -372,23 +367,21 @@ void* Calendar::serverCom(void *)
     {
       delete event;
       write(server_com_sock_, "delete", 7);
-      cout << "sent delete" << endl;
       continue;
     }
 
-    cout << "sent create" << endl;
     write(server_com_sock_, "create", 7);
-    cout << "Wait for create/delete" << endl;
     read(server_com_sock_, d_buffer, 7);
 
     if(strcmp(d_buffer, "create") == 0)
     {
-      cout << "Received create" << endl;
       addEvent(event);
+      cout << "\nNew synchronized event scheduled!" << endl;
+      event->printInfo();
+      cout << "cnw> " << flush;
     }
     if(strcmp(d_buffer, "delete") == 0)
     {
-      cout << "Received delete" << endl;
       delete event;
     }
 

@@ -66,7 +66,7 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
 
   Event* event_now = new Event("now", now, 0);
 
-  // Event is in future.===========================================
+  // Event is in future.
   if(event_now->compareEvent(event) != EARLIER)
   {
     if(calendar.isOverlap(event))
@@ -81,7 +81,6 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
       cout << "Handshake Error : sync not ack" << endl;
       return ERROR;
     }
-    cout << "sync is ack" << endl;
 
     for(unsigned int i = 0; i < params.size(); i++)
     {
@@ -95,7 +94,6 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
         cout << "Handshake Error : data write ack" << endl;
         return ERROR;
       }
-      cout << "data is ack" << endl;
     }
 
     write(calendar.getServerSock(), "ended", 6);
@@ -109,7 +107,7 @@ int Sync::execute(Calendar& calendar, vector<string> &params)
 
     if((strcmp(buffer, "create") == 0))
     {
-      cout << "Event was created and synced with other clients!" << endl;
+      cout << "Event was created and synchronized with other clients!" << endl;
       calendar.addEvent(event);
     }
 
