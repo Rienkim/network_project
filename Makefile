@@ -12,7 +12,7 @@ LDLIBS     =
 all: $(EXECUTABLE) 
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $@ $< -MMD -MF ./$@.d
+	$(CXX) -pthread $(CXXFLAGS) $@ $< -MMD -MF ./$@.d
 
 #link Objects
 $(EXECUTABLE) : $(OBJECTS)

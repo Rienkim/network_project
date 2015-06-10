@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 		Calendar calendar(calendar_queue);
 
 		calendar.addEvent(event1);
-
+		calendar.setConnectionState(false);
 		calendar.run();
 		return SUCCESS;
 	}
@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
 	}
 
 	Calendar calendar(calendar_queue);
+	calendar.setConnectionState(false);
 	calendar.run();
 
 	return SUCCESS;

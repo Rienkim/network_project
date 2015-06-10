@@ -13,7 +13,6 @@
 #include "Show.h"
 #include "Create.h"
 #include "Quit.h"
-#include "Whois.h"
 #include "Update.h"
 #include "Save.h"
 #include "Signin.h"
@@ -230,7 +229,6 @@ int Calendar::run()
   Command* quit = new Quit("Quit", true);
   Command* update = new Update("Update");
   Command* save = new Save("Save");
-  Command* whois = new Whois("Whois");
   Command* signin = new Signin("Signin");
   Command* sync = new Sync("Sync");
 
@@ -246,7 +244,6 @@ int Calendar::run()
   commands["quit"] = quit;
   commands["update"] = update;
   commands["save"] = save;
-  commands["whois"] = whois;
   commands["signin"] = signin;
   commands["sync"] = sync;
 
@@ -306,7 +303,6 @@ int Calendar::run()
   delete quit;
   delete update;
   delete save;
-  delete whois;
   delete signin;
   delete sync;
 
